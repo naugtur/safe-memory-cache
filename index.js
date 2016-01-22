@@ -20,17 +20,9 @@ var bucketsProto = {
         this.spawnBucket()
         this.size = 0
     },
-    findBucket: function findBucket(key) {
-        for (var i = 0; i < this.buckets.length; i++) {
-            if (key in this.buckets[i]) {
-                return i
-            }
-        }
-    },
     set: function set(key, value) {
-        var bucketId = this.findBucket(key)
-        this.buckets[bucketId || 0][key] = value
-        if (!(bucketId >= 0)) {
+        this.buckets[0][key] = value
+        if (!(key in this.buckets[0])) {
             this.size++;
             if (this.max && size >= ~~(this.max / this.buckets.length)) {
                 this.rotateBuckets()
@@ -40,6 +32,11 @@ var bucketsProto = {
     get: function get(key) {
         for (var i = 0; i < this.buckets.length; i++) {
             if (key in this.buckets[i]) {
+                //todo: this should be configurable
+                if (i) {
+                    //put a reference in the newest bucket
+                    this.set(key,this.buckets[i][key])
+                }
                 return this.buckets[i][key]
             }
         }
@@ -60,7 +57,7 @@ function sanitizeHeavy(key) {
 
 
 module.exports = function(opts) {
-    var buckets = ~~(opts.buckets) || 4;
+    var buckets = ~~(opts.buckets) || 2;
     var mem = createMem(buckets, ~~(opts.limit))
     var sanitize = (opts.strongSanitizer ? sanitizeHeavy : sanitizeSimple)
 
