@@ -1,0 +1,28 @@
+{
+  "name": "safe-memory-cache",
+  "version": "1.0.0-rc.1",
+  "description": "Secure and size-limited in-memory cache for Node.js and browsers",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/naugtur/safe-memory-cache.git"
+  },
+  "keywords": [
+    "memory",
+    "cache",
+    "secure",
+    "safe",
+    "ram",
+    "simple",
+    "storage"
+  ],
+  "author": "Zbyszek Tenerowicz <naugtur@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/naugtur/safe-memory-cache/issues"
+  },
+  "homepage": "https://github.com/naugtur/safe-memory-cache"
+}
