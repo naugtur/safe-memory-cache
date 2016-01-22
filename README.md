@@ -60,7 +60,7 @@ Objects used for storing key/value pairs don't inherit from any of the native pr
 
 ### What's with the memory leaks, buckets and delete?
 
-`delete` keyword removes fields from objects, but doesn't release all the memory used by the key entry. As a result, adding and deleting unique fields to a plain JavaScript object will cause memory consumption to grow. Some JavaScript engines had it also leak memory.
+`delete` keyword removes fields from objects, but changes the hidden class of the object which takes up some memory. As a result, adding and deleting unique fields to a plain JavaScript object may cause memory consumption to grow. Some JavaScript engines had it leak memory in various ways.
 
 *Then how do you remove old items from cache if you can't use delete?*
 
