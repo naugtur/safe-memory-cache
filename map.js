@@ -18,9 +18,12 @@ var bucketsProto = {
         this.buckets.unshift(new Map())
     },
     rotateBuckets: function rotateBuckets() {
-        this.buckets.pop()
+        var dropped = this.buckets.pop()
         this.spawnBucket()
         this.size = 0
+        if(this.rotationHook){
+            this.rotationHook(dropped)
+        }
     },
     set: function set(key, value) {
         if (!(key in this.buckets[0])) {
@@ -50,7 +53,8 @@ var bucketsProto = {
 
 module.exports = function(opts) {
     var buckets = ~~(opts.buckets) || 2;
-    var mem = createMem(buckets, ~~(opts.limit))
+    var mem = createMem(buckets, opts.limit)
+    mem.rotationHook = opts.cleanupListener || null
 
     if (opts.maxTTL) {
         var intervalHandle = setInterval(mem.rotateBuckets.bind(mem), ~~(opts.maxTTL / buckets))

@@ -38,6 +38,7 @@ name | type | required | description
  maxTTL | number | N | Time in miliseconds within which an element should no longer be in cache if it was not accessed. Actual time is approximate and will be less or equal `maxTTL`
  strongSanitizer | bool | N | When set to `true` sanitizes keys to prevent memory issues in older JS engines. Defaults to `false`. No sanitization if you use the Map based version.
  buckets | number | N | Overrides the number of buckets used internally. Default is 2
+ cleanupListener | function | N | Calls the function with a storage bucket that's been removed
 
 #### What limit should I set ?
 If you expect N keys to be used most frequently, limit/buckets should be at least N.

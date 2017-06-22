@@ -18,9 +18,12 @@ var bucketsProto = {
         this.buckets.unshift(Object.create(null))
     },
     rotateBuckets: function rotateBuckets() {
-        this.buckets.pop()
+        var dropped = this.buckets.pop()
         this.spawnBucket()
         this.size = 0
+        if(this.rotationHook){
+            this.rotationHook(dropped)
+        }
     },
     set: function set(key, value) {
         if (!(key in this.buckets[0])) {
@@ -61,7 +64,8 @@ function sanitizeHeavy(key) {
 
 module.exports = function(opts) {
     var buckets = ~~(opts.buckets) || 2;
-    var mem = createMem(buckets, ~~(opts.limit))
+    var mem = createMem(buckets, opts.limit)
+    mem.rotationHook = opts.cleanupListener || null
     var sanitize = (opts.strongSanitizer ? sanitizeHeavy : sanitizeSimple)
 
     if (opts.maxTTL) {
@@ -77,6 +81,7 @@ module.exports = function(opts) {
         },
         clear: mem.clear.bind(mem),
         destroy: function() {
+            mem.rotationHook = null
             clearInterval(intervalHandle)
         },
         _get_buckets: function(){
