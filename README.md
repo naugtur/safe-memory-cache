@@ -24,13 +24,19 @@ cache.get("key1") == undefined
 cache.destroy() //only needed if you use maxTTL
 ```
 
+If your engine supports `Map`, you can use the map based version. It doesn't need (nor have) sanitization on keys and it uses Maps as buckets for storage.
+
+```
+const safeMemoryCache = require('safe-memory-cache/map')
+```
+
 ### options:
 
 name | type | required | description
  --- | --- | --- | ---
  limit | number | Y | Maximum number of items to store in cache. When cache length is close to the limit, oldest items are removed to make more room.
  maxTTL | number | N | Time in miliseconds within which an element should no longer be in cache if it was not accessed. Actual time is approximate and will be less or equal `maxTTL`
- strongSanitizer | bool | N | When set to `true` sanitizes keys very carefully. Defaults to `false` - simpler sanitization<2..10>
+ strongSanitizer | bool | N | When set to `true` sanitizes keys to prevent memory issues in older JS engines. Defaults to `false`. No sanitization if you use the Map based version.
  buckets | number | N | Overrides the number of buckets used internally. Default is 2
 
 #### What limit should I set ?
@@ -41,7 +47,7 @@ If you expect N keys to be used most frequently, limit/buckets should be at leas
 
 ## What is it fit for?
 
- Caching in general. When you need to cache results of some long running function and you don't have a strong requirement to forget every item after its exact expiry time, no sooner.
+ Caching in general. When you need to cache results of some long running process or a lot of them and you **don't** have a strong requirement to keep every item until its exact expiry time.
 
 ## Technicalities
 
