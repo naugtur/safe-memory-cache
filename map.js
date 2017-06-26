@@ -32,7 +32,7 @@ var bucketsProto = {
                 this.rotateBuckets()
             }
         }
-        this.buckets[0][key] = value
+        this.buckets[0].set(key, value)
         return value
     },
     get: function get(key) {
@@ -41,9 +41,9 @@ var bucketsProto = {
                 //todo: this should be configurable
                 if (i) {
                     //put a reference in the newest bucket
-                    return this.set(key,this.buckets[i][key])
+                    return this.set(key,this.buckets[i].get(key))
                 }
-                return this.buckets[i][key]
+                return this.buckets[i].get(key)
             }
         }
     }
