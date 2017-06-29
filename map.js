@@ -26,7 +26,7 @@ var bucketsProto = {
         }
     },
     set: function set(key, value) {
-        if (!(key in this.buckets[0])) {
+        if (!(this.buckets[0].has(key))) {
             this.size++;
             if (this.max && this.size >= Math.ceil(this.max / this.buckets.length)) {
                 this.rotateBuckets()
@@ -37,7 +37,7 @@ var bucketsProto = {
     },
     get: function get(key) {
         for (var i = 0; i < this.buckets.length; i++) {
-            if (key in this.buckets[i]) {
+            if (this.buckets[i].has(key)) {
                 //todo: this should be configurable
                 if (i) {
                     //put a reference in the newest bucket
