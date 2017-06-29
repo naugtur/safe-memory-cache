@@ -67,8 +67,11 @@ module.exports = function(opts) {
         destroy: function() {
             clearInterval(intervalHandle)
         },
-        _get_buckets: function(){
+        _get_buckets: function() {
             return mem.buckets
+        },
+        _rotate_bucketes: function() {
+            return mem.rotateBuckets()
         }
     }
 
