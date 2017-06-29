@@ -87,7 +87,7 @@ module.exports = function(opts) {
         _get_buckets: function(){
             return mem.buckets
         },
-        _rotate_bucketes: function() {
+        _rotate_buckets: function() {
             return mem.rotateBuckets()
         }
     }
