@@ -1,6 +1,6 @@
 {
   "name": "safe-memory-cache",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "description": "Secure and size-limited in-memory cache for Node.js and browsers",
   "main": "index.js",
   "scripts": {
