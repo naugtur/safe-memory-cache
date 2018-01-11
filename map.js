@@ -1,5 +1,5 @@
 function createMem(number, limit, refreshF = null) {
-  var mem = Object.create(bucketsProto)
+    var mem = Object.create(bucketsProto)
     mem.refreshF = refreshF
     mem.N = number
     mem.max = limit
@@ -43,7 +43,7 @@ var bucketsProto = {
                 if (i) {
                     //put a reference in the newest bucket
                     this.set(key,value)
-                    if (this.refreshF) this.refreshF(key)
+                    if (this.refreshF) this.refreshF(key, value)
                 }
                 return value
             }
@@ -55,7 +55,7 @@ var bucketsProto = {
 
 module.exports = function(opts) {
     var buckets = ~~(opts.buckets) || 2;
-    var mem = createMem(buckets, opts.limit)
+    var mem = createMem(buckets, opts.limit, opts.refreshF)
     mem.rotationHook = opts.cleanupListener || null
 
     if (opts.maxTTL) {

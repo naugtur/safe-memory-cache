@@ -6,7 +6,10 @@ console.log('# Main implementation')
 var safeMemoryCache = require('./index')
 
 var c = safeMemoryCache({
-    limit:5
+    limit:5,
+    refreshF: function(key, value) {
+        this.set(key, value + 'r')
+    }
 })
 
 console.log('Empty state', c._get_buckets())
@@ -31,6 +34,8 @@ c.set('4','x')
 
 console.log('After adding 4 more items to a collection limited to 5', c._get_buckets())
 assert.equal(c.get('a'), 'x', 'a should be still available from second bucket')
+console.log('Refreshed state', c._get_buckets())
+assert.equal(c.get('a'), 'xr', 'a should be refreshed')
 console.log('After running a .get', c._get_buckets())
 console.log('ok')
 
@@ -53,7 +58,10 @@ var safeMemoryCache = require('./map')
 
 
 var c = safeMemoryCache({
-    limit:5
+    limit:5,
+    refreshF: function(key, value) {
+        this.set(key, value + 'r')
+    }
 })
 
 console.log('Empty state', c._get_buckets())
@@ -78,6 +86,8 @@ c.set('4','x')
 
 console.log('After adding 4 more items to a collection limited to 5', c._get_buckets())
 assert.equal(c.get('a'), 'x', 'a should be still available from second bucket')
+console.log('After refresh', c._get_buckets())
+assert.equal(c.get('a'), 'xr', 'a should be refreshed')
 console.log('After running a .get', c._get_buckets())
 console.log('ok')
 
