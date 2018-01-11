@@ -1,5 +1,6 @@
-function createMem(number, limit) {
-    var mem = Object.create(bucketsProto)
+function createMem(number, limit, refreshF = null) {
+  var mem = Object.create(bucketsProto)
+    mem.refreshF = refreshF
     mem.N = number
     mem.max = limit
     mem.clear()
@@ -38,12 +39,13 @@ var bucketsProto = {
     get: function get(key) {
         for (var i = 0; i < this.buckets.length; i++) {
             if (key in this.buckets[i]) {
-                //todo: this should be configurable
+                const value = this.buckets[i][key]
                 if (i) {
                     //put a reference in the newest bucket
-                    return this.set(key,this.buckets[i][key])
+                    this.set(key,value)
+                    if (this.refreshF) this.refreshF(key)
                 }
-                return this.buckets[i][key]
+                return value
             }
         }
     }
