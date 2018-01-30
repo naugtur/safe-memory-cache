@@ -43,7 +43,7 @@ var bucketsProto = {
                 if (i) {
                     //put a reference in the newest bucket
                     this.set(key,value)
-                    if (this.refreshF) this.refreshF(key, value)
+                  if (this.refreshF) this.refreshF(key, value, this)
                 }
                 return value
             }
