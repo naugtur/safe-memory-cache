@@ -1,5 +1,6 @@
-function createMem(number, limit) {
+function createMem(number, limit, refreshF = null) {
     var mem = Object.create(bucketsProto)
+    mem.refreshF = refreshF
     mem.N = number
     mem.max = limit
     mem.clear()
@@ -38,12 +39,13 @@ var bucketsProto = {
     get: function get(key) {
         for (var i = 0; i < this.buckets.length; i++) {
             if (key in this.buckets[i]) {
-                //todo: this should be configurable
+                const value = this.buckets[i][key]
                 if (i) {
                     //put a reference in the newest bucket
-                    return this.set(key,this.buckets[i][key])
+                    this.set(key,value)
+                  if (this.refreshF) this.refreshF(key, value, this)
                 }
-                return this.buckets[i][key]
+                return value
             }
         }
     }
@@ -64,7 +66,7 @@ function sanitizeHeavy(key) {
 
 module.exports = function(opts) {
     var buckets = ~~(opts.buckets) || 2;
-    var mem = createMem(buckets, opts.limit)
+    var mem = createMem(buckets, opts.limit, opts.refreshF)
     mem.rotationHook = opts.cleanupListener || null
     var sanitize = (opts.strongSanitizer ? sanitizeHeavy : sanitizeSimple)
 
