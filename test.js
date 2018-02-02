@@ -7,8 +7,8 @@ var safeMemoryCache = require('./index')
 
 var c = safeMemoryCache({
     limit:5,
-    refreshF: function(key, value) {
-        this.set(key, value + 'r')
+    refreshF: function(key, value, cache) {
+        cache.set(key, value + 'r')
     }
 })
 
@@ -59,8 +59,8 @@ var safeMemoryCache = require('./map')
 
 var c = safeMemoryCache({
     limit:5,
-    refreshF: function(key, value) {
-        this.set(key, value + 'r')
+    refreshF: function(key, value, cache) {
+      cache.set(key, value + 'r')
     }
 })
 
