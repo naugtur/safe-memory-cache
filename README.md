@@ -5,14 +5,13 @@ Secure and size-limited in-memory cache for Node.js and browsers.
 
 - Is lightweight and has trivial API
 - Can't be broken by a malicious key (`__proto__`)
-- Can't be affected by modifications to native prototypes
-- Limits the number of items without the use of `delete` (and no memory leaks caused by `delete`), plays well with garbage collector. But also doesn't drop the whole cache when full, frees up gradually
+- Limits the number of items without the use of `delete` (and no memory leaks caused by `delete`), plays well with garbage collector. But also **doesn't drop the whole cache when full, frees up gradually**
 - Doesn't waste your eventloop ticks with timeouts set to remove single items from cache, but still deletes oldest items first
 
 ## Usage
 
 ```
-var safeMemoryCache = require('safe-memory-cache')
+var {safeMemoryCache} = require('safe-memory-cache')
 var cache = safeMemoryCache(options)
 
 cache.set("key1","value1")
@@ -24,10 +23,10 @@ cache.get("key1") == undefined
 cache.destroy() //only needed if you use maxTTL
 ```
 
-If your engine supports `Map`, you can use the map based version. It doesn't need (nor have) sanitization on keys and it uses Maps as buckets for storage.
+If your engine doesn't support `Map`, you can use the legacy version. It does manual sanitization on keys and it uses plain objects as buckets for storage.
 
 ```
-const safeMemoryCache = require('safe-memory-cache/map')
+const safeMemoryCache = require('safe-memory-cache/legacy')
 ```
 
 ### options:

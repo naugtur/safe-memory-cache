@@ -9,88 +9,72 @@ function createMem(number, limit) {
 var bucketsProto = {
     clear: function clear() {
         this.size = 0
-        this.buckets=[];
+        this.buckets = [];
         for (var i = 0; i < this.N; i++) {
             this.spawnBucket()
         }
     },
     spawnBucket: function spawnBucket() {
-        this.buckets.unshift(Object.create(null))
+        this.buckets.unshift(new Map())
     },
     rotateBuckets: function rotateBuckets() {
         var dropped = this.buckets.pop()
         this.spawnBucket()
         this.size = 0
-        if(this.rotationHook){
+        if (this.rotationHook) {
             this.rotationHook(dropped)
         }
     },
     set: function set(key, value) {
-        if (!(key in this.buckets[0])) {
+        if (!(this.buckets[0].has(key))) {
             this.size++;
             if (this.max && this.size >= Math.ceil(this.max / this.buckets.length)) {
                 this.rotateBuckets()
             }
         }
-        this.buckets[0][key] = value
+        this.buckets[0].set(key, value)
         return value
     },
     get: function get(key) {
         for (var i = 0; i < this.buckets.length; i++) {
-            if (key in this.buckets[i]) {
+            if (this.buckets[i].has(key)) {
                 //todo: this should be configurable
                 if (i) {
                     //put a reference in the newest bucket
-                    return this.set(key,this.buckets[i][key])
+                    return this.set(key, this.buckets[i].get(key))
                 }
-                return this.buckets[i][key]
+                return this.buckets[i].get(key)
             }
         }
     }
 }
 
-var protoRegex = /__proto__/g;
-
-function sanitizeSimple(key) {
-    return '' + key.replace(protoRegex, 'z__proto__')
-}
-
-function sanitizeHeavy(key) {
-    return ('' + key).split('').map(function(char) {
-        return char.charCodeAt(0).toString(32)
-    }).join('z')
-}
 
 
-module.exports = function(opts) {
-    var buckets = ~~(opts.buckets) || 2;
-    var mem = createMem(buckets, opts.limit)
-    mem.rotationHook = opts.cleanupListener || null
-    var sanitize = (opts.strongSanitizer ? sanitizeHeavy : sanitizeSimple)
+module.exports = {
+    safeMemoryCache(opts) {
+        var buckets = ~~(opts.buckets) || 2;
+        var mem = createMem(buckets, opts.limit)
+        mem.rotationHook = opts.cleanupListener || null
 
-    if (opts.maxTTL) {
-        var intervalHandle = setInterval(mem.rotateBuckets.bind(mem), ~~(opts.maxTTL / buckets))
-    }
-
-    return {
-        set: function(key, value) {
-            return mem.set(sanitize(key), value)
-        },
-        get: function(key) {
-            return mem.get(sanitize(key))
-        },
-        clear: mem.clear.bind(mem),
-        destroy: function() {
-            mem.rotationHook = null
-            clearInterval(intervalHandle)
-        },
-        _get_buckets: function(){
-            return mem.buckets
-        },
-        _rotate_buckets: function() {
-            return mem.rotateBuckets()
+        if (opts.maxTTL) {
+            var intervalHandle = setInterval(mem.rotateBuckets.bind(mem), ~~(opts.maxTTL / buckets))
         }
+
+        return {
+            set: mem.set.bind(mem),
+            get: mem.get.bind(mem),
+            clear: mem.clear.bind(mem),
+            destroy: function () {
+                clearInterval(intervalHandle)
+            },
+            _get_buckets: function () {
+                return mem.buckets
+            },
+            _rotate_buckets: function () {
+                return mem.rotateBuckets()
+            }
+        }
+
     }
-
-
 }

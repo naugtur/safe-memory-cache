@@ -2,8 +2,8 @@ var assert = require('assert')
 
 
 
-console.log('# Main implementation')
-var safeMemoryCache = require('./index')
+console.log('# Legacy implementation')
+var safeMemoryCache = require('./legacy')
 
 var c = safeMemoryCache({
     limit:5
@@ -49,7 +49,7 @@ console.log('ok')
 
 console.log('# Map implementation')
 
-var safeMemoryCache = require('./map')
+var {safeMemoryCache} = require('./index')
 
 
 var c = safeMemoryCache({
