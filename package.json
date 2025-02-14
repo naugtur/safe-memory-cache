@@ -4,7 +4,7 @@
   "description": "Secure and size-limited in-memory cache for Node.js and browsers",
   "main": "index.js",
   "scripts": {
-    "test": "node test.js"
+    "test": "node --expose-gc --test test.js"
   },
   "repository": {
     "type": "git",
@@ -19,7 +19,7 @@
     "simple",
     "storage"
   ],
-  "author": "Zbyszek Tenerowicz <naugtur@gmail.com>",
+  "author": "naugtur <naugtur@gmail.com>",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/naugtur/safe-memory-cache/issues"

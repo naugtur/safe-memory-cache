@@ -1,80 +1,127 @@
-function createMem(number, limit) {
-    var mem = Object.create(bucketsProto)
-    mem.N = number
-    mem.max = limit
-    mem.clear()
-    return mem
+const { create, freeze, defineProperties } = Object
+const { bind } = Function.prototype
+const uncurryThis = bind.bind(bind.call)
+const { setTimeout, setInterval, clearInterval } = globalThis
+
+const arrayUnshift = uncurryThis(Array.prototype.unshift)
+const arrayPush = uncurryThis(Array.prototype.push)
+const arrayPop = uncurryThis(Array.prototype.pop)
+
+const mapHas = uncurryThis(Map.prototype.has)
+const mapGet = uncurryThis(Map.prototype.get)
+const mapSet = uncurryThis(Map.prototype.set)
+
+const private = new WeakMap()
+const getPriv = private.get.bind(private)
+const setPriv = private.set.bind(private)
+
+function spawnBucket(buckets) {
+    arrayUnshift(buckets, new Map())
+}
+
+function rotateBuckets(buckets, rotationHook) {
+    let i = 0
+    while (i<buckets.length && buckets[i].size === 0) {
+        i++
+    }
+    if (i === buckets.length) {
+        // nothing to do, all buckets empty
+        return
+    }
+    const dropped = arrayPop(buckets)
+    spawnBucket(buckets)
+    if (rotationHook) {
+        rotationHook(dropped)
+    }
 }
 
 var bucketsProto = {
     clear: function clear() {
-        this.size = 0
-        this.buckets = [];
+        const buckets = []
+        setPriv(this, buckets)
         for (var i = 0; i < this.N; i++) {
-            this.spawnBucket()
-        }
-    },
-    spawnBucket: function spawnBucket() {
-        this.buckets.unshift(new Map())
-    },
-    rotateBuckets: function rotateBuckets() {
-        var dropped = this.buckets.pop()
-        this.spawnBucket()
-        this.size = 0
-        if (this.rotationHook) {
-            this.rotationHook(dropped)
+            spawnBucket(buckets)
         }
     },
     set: function set(key, value) {
-        if (!(this.buckets[0].has(key))) {
-            this.size++;
-            if (this.max && this.size >= Math.ceil(this.max / this.buckets.length)) {
-                this.rotateBuckets()
+        const buckets = getPriv(this)
+        if (!(mapHas(buckets[0], key))) {
+            if (this.max && buckets[0].size >= Math.ceil(this.max / this.N)) {
+                rotateBuckets(buckets, this.rotationHook)
             }
         }
-        this.buckets[0].set(key, value)
+        mapSet(buckets[0], key, value)
         return value
     },
     get: function get(key) {
-        for (var i = 0; i < this.buckets.length; i++) {
-            if (this.buckets[i].has(key)) {
-                //todo: this should be configurable
-                if (i) {
-                    //put a reference in the newest bucket
-                    return this.set(key, this.buckets[i].get(key))
+        const buckets = getPriv(this)
+        const retain = this.retainUsed
+
+        for (var i = 0; i < buckets.length; i++) {
+            if (mapHas(buckets[i], key)) {
+                const value = mapGet(buckets[i], key)
+                if (i && retain) {
+                    //put a reference in the newest bucket to retain most used refs longer
+                    return this.set(key, value)
                 }
-                return this.buckets[i].get(key)
+                return value
             }
         }
+    },
+    _get_buckets: function () { return getPriv(this) },
+}
+
+const weakRotate = (memWeakRef) => {
+    const mem = memWeakRef.deref()
+    if (mem) {
+        rotateBuckets(getPriv(mem), mem.rotationHook)
+        return true
+    } else {
+        return false
+    }
+}
+
+function rotateBucketsPeriodically(memWeakRef, interval) {
+    const handle = setInterval(() => {
+        if (false === weakRotate(memWeakRef)) {
+            clearInterval(handle)
+        }
+    }, interval)
+    // don't keep node live
+    if (handle.unref) {
+        handle.unref()
     }
 }
 
 
-
 module.exports = {
+    /**
+     * 
+     * @param {object} opts
+     * @param {number} [opts.buckets] - number of buckets to use (default 2)
+     * @param {number} [opts.limit] - max number of items to store (default unlimited)
+     * @param {number} [opts.maxTTL] - max time to live for an item
+     * @param {boolean} [opts.retainUsed] - retain most used items longer if possible
+     * @param {function} [opts.cleanupListener] - callback to call when a bucket is rotated
+     */
     safeMemoryCache(opts) {
-        var buckets = ~~(opts.buckets) || 2;
-        var mem = createMem(buckets, opts.limit)
-        mem.rotationHook = opts.cleanupListener || null
+        const number = ~~(opts.buckets) || 2;
+
+        const mem = create(bucketsProto)
+
+        defineProperties(mem, {
+            N: { value: number, enumerable: false },
+            max: { value: opts.limit, enumerable: false },
+            rotationHook: { value: opts.cleanupListener || null, enumerable: false },
+            retainUsed: { value: opts.retainUsed || false, enumerable: false }
+        })
+        mem.clear()
 
         if (opts.maxTTL) {
-            var intervalHandle = setInterval(mem.rotateBuckets.bind(mem), ~~(opts.maxTTL / buckets))
+            // use a weakref to not retain mem while accessing rotateBucket
+            const memWeakRef = new WeakRef(mem)
+            rotateBucketsPeriodically(memWeakRef, ~~(opts.maxTTL / number))
         }
-
-        return {
-            set: mem.set.bind(mem),
-            get: mem.get.bind(mem),
-            clear: mem.clear.bind(mem),
-            destroy: function () {
-                clearInterval(intervalHandle)
-            },
-            _get_buckets: function () {
-                return mem.buckets
-            },
-            _rotate_buckets: function () {
-                return mem.rotateBuckets()
-            }
-        }
-
+        return freeze(mem)
     }
 }
