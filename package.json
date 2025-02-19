@@ -3,6 +3,7 @@
   "version": "3.0.0",
   "description": "Secure and size-limited in-memory cache for Node.js and browsers",
   "main": "index.js",
+  "types": "index.d.ts",
   "scripts": {
     "test": "node --expose-gc --test test.js"
   },
@@ -17,7 +18,8 @@
     "safe",
     "ram",
     "simple",
-    "storage"
+    "storage",
+    "typescript"
   ],
   "author": "naugtur <naugtur@gmail.com>",
   "license": "MIT",
