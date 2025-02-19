@@ -11,9 +11,9 @@ const mapHas = uncurryThis(Map.prototype.has)
 const mapGet = uncurryThis(Map.prototype.get)
 const mapSet = uncurryThis(Map.prototype.set)
 
-const private = new WeakMap()
-const getPriv = private.get.bind(private)
-const setPriv = private.set.bind(private)
+const priv = new WeakMap()
+const getPriv = priv.get.bind(priv)
+const setPriv = priv.set.bind(priv)
 
 function spawnBucket(buckets) {
     arrayUnshift(buckets, new Map())
@@ -96,7 +96,7 @@ function rotateBucketsPeriodically(memWeakRef, interval) {
 
 module.exports = {
     /**
-     * 
+     *
      * @param {object} opts
      * @param {number} [opts.buckets] - number of buckets to use (default 2)
      * @param {number} [opts.limit] - max number of items to store (default unlimited)
