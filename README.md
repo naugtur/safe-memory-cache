@@ -58,3 +58,22 @@ The implementation uses defensive coding to avoid relying on intrinsics that cou
 Cache consists of a number of buckets and the oldest bucket is removed when new room is needed. Therefore the oldest (1/buckets) of entries gets removed.
 
 There's only one interval created per cache instance.
+
+## TypeScript
+
+This module has TypeScript definitions included. If you're using TypeScript you can optionally
+provide a type for the values you're storing in the cache.
+
+```typescript
+interface Post {
+  title: string;
+  author: string;
+  text: string;
+  likes: number;
+}
+
+const posts = safeMemoryCache<Post>({ limit: 10 });
+```
+
+The methods `set()` and `get()` will then expect and return values matching the given type, in this
+case: `Post`.
