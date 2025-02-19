@@ -35,10 +35,6 @@ declare module "safe-memory-cache" {
     clear(): void;
   }
 
-  export type SafeMemoryCacheStructure = {
-    [key: string]: unknown;
-  };
-
   export function safeMemoryCache<Value>(
     options: SafeMemoryCacheOptions,
   ): SafeMemoryCache<Value>;
